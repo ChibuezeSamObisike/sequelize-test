@@ -43,14 +43,15 @@ const User = sequelize.define(
 
 User.sync({ alter: true })
   .then(() => {
-    return User.findAll({
-      //Check where length of the username is 6
-      where: sequelize.fn("char_length", sequelize.col("username"), 6),
-    });
+    return User.update(
+      { username: "Pizza" },
+      {
+        where: { age: { [Op.gt]: 3 } },
+      }
+    );
   })
   .then((data) => {
-    const item = data.map((i) => i.toJSON());
-    console.log(item);
+    console.log(data);
   })
   .catch((err) => {
     console.log(err);
