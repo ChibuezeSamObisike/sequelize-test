@@ -43,13 +43,14 @@ const User = sequelize.define(
 
 User.sync({ alter: true })
   .then(() => {
-    return User.findOrCreate({
+    return User.findAndCountAll({
       where: { username: "Olivia Oputa" },
       raw: true,
     });
   })
   .then((data) => {
-    console.log(data);
+    console.log("Dtx", data);
+    //This returns rows and counts when destructured from data
   })
   .catch((err) => {
     console.log(err);
