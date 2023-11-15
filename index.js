@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+import { Sequelize, where } from "sequelize";
 const sequelize = new Sequelize("sequelize-video", "root", "", {
   dialect: "mysql",
   //   define: {
@@ -43,12 +43,10 @@ const User = sequelize.define(
 
 User.sync({ alter: true })
   .then(() => {
-    return User.update(
-      { username: "Pizza" },
-      {
-        where: { age: { [Op.gt]: 3 } },
-      }
-    );
+    return User.findOrCreate({
+      where: { username: "Olivia Oputa" },
+      raw: true,
+    });
   })
   .then((data) => {
     console.log(data);
