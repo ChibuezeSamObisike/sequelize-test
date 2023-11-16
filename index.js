@@ -1,4 +1,5 @@
 import { Sequelize, where } from "sequelize";
+import bcrypt from "bcrypt";
 const sequelize = new Sequelize("sequelize-video", "root", "", {
   dialect: "mysql",
   //   define: {
@@ -21,9 +22,21 @@ const User = sequelize.define(
     username: {
       type: DataTypes.STRING,
       allowNull: false,
+      get() {
+        const rawVal = this.getDataValue("username") + "";
+        return rawVal.toUpperCase();
+      },
+      validate: {
+        len: [2, 10],
+      },
     },
     password: {
       type: DataTypes.STRING,
+      set(value) {
+        const salt = bcrypt.genSaltSync(12);
+        const hash = bcrypt.hashSync(value, salt);
+        this.setDataValue("password", hash);
+      },
     },
     age: {
       type: DataTypes.INTEGER,
@@ -43,13 +56,13 @@ const User = sequelize.define(
 
 User.sync({ alter: true })
   .then(() => {
-    return User.findAndCountAll({
-      where: { username: "Olivia Oputa" },
-      raw: true,
+    return User.create({
+      username: "Nyerishi",
+      password: "Hello!World1",
     });
   })
   .then((data) => {
-    console.log("Dtx", data);
+    console.log("Dtx", data.password);
     //This returns rows and counts when destructured from data
   })
   .catch((err) => {
