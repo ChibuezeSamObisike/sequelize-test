@@ -1,5 +1,7 @@
 import { Sequelize, where } from "sequelize";
 import bcrypt from "bcrypt";
+import zlib from "zlib";
+
 const sequelize = new Sequelize("sequelize-video", "root", "", {
   dialect: "mysql",
   //   define: {
@@ -45,6 +47,13 @@ const User = sequelize.define(
     WithCodeRocks: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
+    },
+    description: {
+      type: DataTypes.STRING,
+      set(value) {
+        const compressed = zlib.deflateSync(value).toString("base64");
+        this.setDataValue("description", compressed);
+      },
     },
   },
   {
