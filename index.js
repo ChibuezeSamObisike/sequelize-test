@@ -1,6 +1,7 @@
 import { Sequelize, where } from "sequelize";
 import bcrypt from "bcrypt";
 import zlib from "zlib";
+import { Buffer } from "buffer";
 
 const sequelize = new Sequelize("sequelize-video", "root", "", {
   dialect: "mysql",
@@ -50,9 +51,21 @@ const User = sequelize.define(
     },
     description: {
       type: DataTypes.STRING,
+      allowNull: true,
       set(value) {
         const compressed = zlib.deflateSync(value).toString("base64");
         this.setDataValue("description", compressed);
+      },
+      get() {
+        const value = this.getDataValue("description");
+        const uncompressed = zlib.inflateSync(Buffer.from(value, "base64"));
+        return uncompressed.toString();
+      },
+    },
+    aboutUser: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.username;
       },
     },
   },
@@ -65,13 +78,10 @@ const User = sequelize.define(
 
 User.sync({ alter: true })
   .then(() => {
-    return User.create({
-      username: "Nyerishi",
-      password: "Hello!World1",
-    });
+    return User.findOne({ where: { username: "Nyerishi" } });
   })
   .then((data) => {
-    console.log("Dtx", data.password);
+    console.log("Answer", data.aboutUser);
     //This returns rows and counts when destructured from data
   })
   .catch((err) => {
