@@ -1,7 +1,6 @@
 import { Sequelize, where } from "sequelize";
 import bcrypt from "bcrypt";
 import zlib from "zlib";
-import { Buffer } from "buffer";
 
 const sequelize = new Sequelize("sequelize-video", "root", "", {
   dialect: "mysql",
@@ -44,6 +43,16 @@ const User = sequelize.define(
     age: {
       type: DataTypes.INTEGER,
       defaultValue: 21,
+      validate: {
+        isOldEnough(value) {
+          if (value < 21) {
+            throw new Error("An unexpected error occured");
+          }
+        },
+        isNumeric: {
+          msg: "You must enter a number for age",
+        },
+      },
     },
     WithCodeRocks: {
       type: DataTypes.BOOLEAN,
@@ -68,6 +77,22 @@ const User = sequelize.define(
         return this.username;
       },
     },
+    email: {
+      type: DataTypes.STRING,
+      unique: true,
+      validate: {
+        isEmail: true,
+        isIn: {
+          args: ["@soccer.org"],
+          msg: "You didn't put in the correct email",
+        },
+        myEmailValidator(value) {
+          if (value === null) {
+            throw new Error("Please enter an email");
+          }
+        },
+      },
+    },
   },
   {
     freezeTableName: true,
@@ -78,10 +103,14 @@ const User = sequelize.define(
 
 User.sync({ alter: true })
   .then(() => {
-    return User.findOne({ where: { username: "Nyerishi" } });
+    return User.create({
+      email: "samobisike@gmail.com",
+      username: "Nyerishi",
+      password: "Hello!World",
+    });
   })
   .then((data) => {
-    console.log("Answer", data.aboutUser);
+    console.log(data.toJSON());
     //This returns rows and counts when destructured from data
   })
   .catch((err) => {
